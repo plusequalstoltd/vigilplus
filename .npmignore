@@ -1,0 +1,39 @@
+# Source maps (not needed in production)
+*.map
+
+# Source TypeScript files (already compiled to dist/)
+src/
+
+# Development files
+tsconfig.json
+*.test.js
+*.test.ts
+
+# Build tools and configs
+jest.config.js
+.eslintrc*
+.prettierrc*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# Package files
+*.tgz
+
+# Deployment files (provided separately)
+deploy/ 
