@@ -1,10 +1,13 @@
 {
-  "name": "vigilplus",
+  "name": "@plusequalstoltd/vigilplus",
   "version": "1.0.0",
   "description": "Advanced server monitoring tool with real-time metrics",
   "main": "dist/index.js",
   "bin": {
     "vigilplus": "dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc",
