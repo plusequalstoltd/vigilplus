@@ -8,8 +8,11 @@ yarn-error.log*
 dist/
 *.tgz
 
+# TypeScript cache
+*.tsbuildinfo
+
 # Runtime data
-pids
+pids/
 *.pid
 *.seed
 *.pid.lock
@@ -17,27 +20,7 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
-
-# nyc test coverage
 .nyc_output
-
-# Grunt intermediate storage
-.grunt
-
-# Bower dependency directory
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release
-
-# Dependency directories
-jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
@@ -54,29 +37,28 @@ jspm_packages/
 # Optional REPL history
 .node_repl_history
 
-# Output of 'npm pack'
-*.tgz
-
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# Environment variables
 .env
-.env.test
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# parcel-bundler cache
+# Parcel-bundler cache
 .cache
 .parcel-cache
 
 # Next.js build output
 .next
+out/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
-.cache/
 public
 
 # Storybook build outputs
@@ -104,35 +86,17 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-logs
+logs/
 *.log
 
-# Runtime data
-pids
-*.pid
-*.seed
+# Production specific
+vigilplus-*.tgz
+monitor.log
+system-*.json
+exports/
 
-# Coverage directory used by tools like istanbul
-coverage
-
-# Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons (http://nodejs.org/api/addons.html)
-build/Release
-
-# Dependency directory
-# https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
-node_modules
-
-# Debug log from npm
-npm-debug.log
-
-# Local development
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local 
+# Security
+.ssh/
+*.key
+*.pem
+*.crt 

@@ -1,14 +1,26 @@
-# MonitorPlus Linux Server Deployment Guide
+# VigilPlus Linux Server Deployment Guide
 
-This guide will help you deploy MonitorPlus to your Linux server for production monitoring.
+This guide will help you deploy VigilPlus to your Linux server for production monitoring.
 
-## 🎯 What You'll Get on Linux
+## 🎯 Two Ways to Use VigilPlus
 
-- ✅ **Full temperature monitoring** (CPU, disk, chipset temperatures)
-- ✅ **Better performance metrics** (more detailed CPU/memory info)
-- ✅ **System service integration** (runs automatically on boot)
-- ✅ **Persistent logging** to `/var/log/monitorplus/`
-- ✅ **Automatic restarts** if the service crashes
+### 📱 **API Server Mode** (Recommended)
+- **For Flutter App**: Provides HTTP API endpoints for your mobile app
+- **Remote Access**: Monitor your server from anywhere via the mobile app
+- **Real-time Data**: Live metrics, alerts, and system information
+- **Port**: Runs on port 8080 by default
+
+### 💻 **Terminal Monitor Mode** 
+- **For Console Use**: Direct terminal output and logging
+- **Local Monitoring**: Perfect for SSH sessions and server admins
+- **Background Process**: Runs quietly and logs to files
+- **Logs**: Saves to `/var/log/vigilplus/monitor.log`
+
+### 🚀 **Both Modes** (Best of Both Worlds)
+- **API Server + Monitor**: Run both simultaneously
+- **Complete Coverage**: Flutter app access + terminal logging
+- **Production Ready**: Perfect for comprehensive monitoring
+- **Dual Output**: HTTP API endpoints + log files
 
 ## 📋 Prerequisites
 
@@ -18,73 +30,80 @@ This guide will help you deploy MonitorPlus to your Linux server for production 
 
 ## 🚀 Quick Deployment
 
-### Step 1: Transfer Files to Server
+### Step 1: Install VigilPlus
 
 ```bash
-# Copy the package to your server
-scp monitorplus-1.0.0.tgz user@your-server:/tmp/
-scp deploy/* user@your-server:/tmp/
+# Install globally via npm
+sudo npm install -g vigilplus
+
+# The post-install script will guide you through setup
 ```
 
-### Step 2: Install on Server
+**During installation, you'll be asked:**
+1. **Service vs Background**: Set up as system service (auto-start) or simple background process
+2. **Mode Selection**: Choose API Server, Terminal Monitor, or Both modes simultaneously
+3. **Auto-start**: Whether to start immediately after installation
 
+### Step 2: Choose Your Mode
+
+#### 📱 API Server Mode (Flutter App)
 ```bash
-# SSH to your server
-ssh user@your-server
+# Manual start
+vigilplus server --port 8080 --host 0.0.0.0
 
-# Navigate to temp directory
-cd /tmp
-
-# Make scripts executable
-chmod +x install.sh setup-service.sh
-
-# Install MonitorPlus
-sudo bash install.sh
-
-# Set up as system service (optional but recommended)
-sudo bash setup-service.sh
+# Your Flutter app can now connect to:
+# http://your-server-ip:8080
 ```
 
-### Step 3: Start Monitoring
-
+#### 💻 Terminal Monitor Mode
 ```bash
-# Start the service
-sudo systemctl start monitorplus
+# Manual start  
+vigilplus monitor --interval 5
 
-# Check status
-sudo systemctl status monitorplus
-
-# View live logs
-sudo tail -f /var/log/monitorplus/monitor.log
+# Background with logging
+vigilplus monitor --interval 5 --log --log-path /var/log/vigilplus/monitor.log
 ```
 
-## 📊 Manual Usage (Alternative)
+#### 🚀 Both Modes (Complete Setup)
+```bash
+# Run API server with built-in monitoring
+vigilplus server --port 8080 --host 0.0.0.0 --with-monitor
 
-If you prefer not to run as a service:
+# Or run them separately (two terminals)
+vigilplus server --port 8080 --host 0.0.0.0 &
+vigilplus monitor --interval 5 --log &
+```
+
+## 📊 API Endpoints (Server Mode)
+
+When running in API server mode, these endpoints are available:
 
 ```bash
-# Real-time monitoring
-monitorplus monitor
+# Health check
+curl http://your-server:8080/health
 
-# Quick status check
-monitorplus status
+# Current system metrics
+curl http://your-server:8080/api/metrics
 
 # System information
-monitorplus info
+curl http://your-server:8080/api/info
 
-# Custom settings
-monitorplus monitor --interval 1000 --cpu-alert 70 --memory-alert 80
+# Historical data (if logging enabled)
+curl http://your-server:8080/api/history
 ```
 
 ## 🔧 Configuration
 
-Service configuration is stored at `/etc/monitorplus/config.json`:
+Service configuration is stored at `/etc/vigilplus/config.json`:
 
 ```json
 {
-  "interval": 5000,
+  "mode": "server",           // "server" or "monitor"
+  "port": 8080,              // API server port
+  "host": "0.0.0.0",         // Listen on all interfaces
+  "interval": 5000,          // Monitoring interval (ms)
   "logToFile": true,
-  "logPath": "/var/log/monitorplus/monitor.log",
+  "logPath": "/var/log/vigilplus/monitor.log",
   "alerts": [
     {
       "metric": "cpu",
@@ -129,28 +148,40 @@ Temp:       65°C    # 🎉 This will work on Linux!
 ## 🎮 Service Management
 
 ```bash
-# Service control
-sudo systemctl start monitorplus      # Start
-sudo systemctl stop monitorplus       # Stop  
-sudo systemctl restart monitorplus    # Restart
-sudo systemctl status monitorplus     # Status
+# Service control (if installed as systemd service)
+sudo systemctl start vigilplus      # Start
+sudo systemctl stop vigilplus       # Stop  
+sudo systemctl restart vigilplus    # Restart
+sudo systemctl status vigilplus     # Status
 
 # Enable/disable auto-start
-sudo systemctl enable monitorplus     # Auto-start on boot
-sudo systemctl disable monitorplus    # Disable auto-start
+sudo systemctl enable vigilplus     # Auto-start on boot
+sudo systemctl disable vigilplus    # Disable auto-start
 
 # View logs
-sudo journalctl -u monitorplus -f     # Service logs
-sudo tail -f /var/log/monitorplus/monitor.log  # Monitoring data
+sudo journalctl -u vigilplus -f     # Service logs
+sudo tail -f /var/log/vigilplus/monitor.log  # Monitoring data
 ```
 
 ## 🔍 Troubleshooting
 
+### Check What's Running
+```bash
+# Check if vigilplus is running
+ps aux | grep vigilplus
+
+# Check which ports are in use
+sudo netstat -tlnp | grep vigilplus
+
+# Check service status (if using systemd)
+sudo systemctl status vigilplus -l
+```
+
 ### Permission Issues
 ```bash
 # If you get permission errors
-sudo chown -R root:root /opt/monitorplus
-sudo chmod +x /opt/monitorplus/dist/cli.js
+sudo chown -R root:root /opt/vigilplus
+sudo chmod +x /opt/vigilplus/dist/cli.js
 ```
 
 ### Missing Node.js
@@ -164,42 +195,45 @@ curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
 sudo yum install nodejs npm
 ```
 
-### Check Service Status
+## 🌐 Remote Access Setup
+
+### For Flutter App (API Server Mode)
+1. **Start API server**: `vigilplus server --port 8080 --host 0.0.0.0`
+2. **Open firewall**: `sudo ufw allow 8080` (Ubuntu) or configure iptables
+3. **Configure Flutter app**: Enter your server IP and port 8080
+4. **Test connection**: Visit `http://your-server-ip:8080/health`
+
+### For Terminal Access (Monitor Mode)
 ```bash
-# Detailed status
-sudo systemctl status monitorplus -l
+# SSH + monitor
+ssh user@server 'vigilplus monitor --interval 5'
 
-# Recent logs
-sudo journalctl -u monitorplus --since "1 hour ago"
+# SSH + view logs
+ssh user@server 'sudo tail -f /var/log/vigilplus/monitor.log'
 ```
-
-## 🌐 Remote Monitoring
-
-To access monitoring data remotely, you can:
-
-1. **SSH + tail logs**:
-   ```bash
-   ssh user@server 'sudo tail -f /var/log/monitorplus/monitor.log'
-   ```
-
-2. **Create API endpoint** (future enhancement):
-   ```bash
-   # Add HTTP server to expose metrics as JSON API
-   curl http://your-server:3000/metrics
-   ```
-
-3. **Forward to monitoring systems**:
-   - Send alerts to Slack/Discord
-   - Forward to Prometheus/Grafana
-   - Integrate with existing monitoring stack
 
 ## 🎯 Production Tips
 
-1. **Log Rotation**: Set up logrotate for `/var/log/monitorplus/`
-2. **Monitoring the Monitor**: Use systemd notifications for service health
-3. **Resource Usage**: MonitorPlus itself uses minimal resources (~10MB RAM)
-4. **Security**: Runs with minimal privileges and protected directories
+1. **Use Both Modes**: Run API server for Flutter app + separate monitor for logging
+2. **Log Rotation**: Set up logrotate for `/var/log/vigilplus/`
+3. **Monitoring the Monitor**: Use systemd notifications for service health
+4. **Resource Usage**: VigilPlus itself uses minimal resources (~10MB RAM)
+5. **Security**: Consider using reverse proxy (nginx) for HTTPS in production
 
----
+## 🚀 Quick Start Examples
 
-Your MonitorPlus will provide much richer data on Linux servers compared to macOS! 🚀 
+```bash
+# Flutter app backend (most common)
+sudo npm install -g vigilplus
+vigilplus server --port 8080 --host 0.0.0.0
+
+# Terminal monitoring with logging
+vigilplus monitor --interval 5 --log
+
+# Both modes - single command (recommended)
+vigilplus server --port 8080 --host 0.0.0.0 --with-monitor
+
+# Both modes - separate processes
+vigilplus server --port 8080 --host 0.0.0.0 &
+vigilplus monitor --interval 10 --log --log-path /var/log/vigilplus/monitor.log &
+``` 

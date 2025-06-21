@@ -2,32 +2,32 @@
 
 set -e
 
-echo "🗑️  MonitorPlus Uninstaller"
-echo "============================"
+echo "🗑️  VigilPlus Uninstaller"
+echo "========================"
 
 # Check if running as root or user
 if [[ $EUID -eq 0 ]]; then
    echo "🔍 Running as root - will remove system-wide installation"
    INSTALL_GLOBAL=true
-   INSTALL_DIR="/opt/monitorplus"
+   INSTALL_DIR="/opt/vigilplus"
    BIN_DIR="/usr/local/bin"
-   SERVICE_FILE="/etc/systemd/system/monitorplus.service"
-   CONFIG_DIR="/etc/monitorplus"
-   LOG_DIR="/var/log/monitorplus"
+   SERVICE_FILE="/etc/systemd/system/vigilplus.service"
+   CONFIG_DIR="/etc/vigilplus"
+   LOG_DIR="/var/log/vigilplus"
 else
    echo "🔍 Running as user - will remove user installation"
    INSTALL_GLOBAL=false
-   INSTALL_DIR="$HOME/.local/monitorplus"
+   INSTALL_DIR="$HOME/.local/vigilplus"
    BIN_DIR="$HOME/.local/bin"
-   SERVICE_FILE="$HOME/.config/systemd/user/monitorplus.service"
-   CONFIG_DIR="$HOME/.config/monitorplus"
-   LOG_DIR="$HOME/.local/log/monitorplus"
+   SERVICE_FILE="$HOME/.config/systemd/user/vigilplus.service"
+   CONFIG_DIR="$HOME/.config/vigilplus"
+   LOG_DIR="$HOME/.local/log/vigilplus"
 fi
 
 echo ""
 echo "⚠️  This will remove:"
 echo "   📁 Installation: $INSTALL_DIR"
-echo "   🔗 Command: $BIN_DIR/monitorplus"
+echo "   🔗 Command: $BIN_DIR/vigilplus"
 if [ "$INSTALL_GLOBAL" = true ]; then
    echo "   ⚙️  Service: $SERVICE_FILE"
    echo "   📝 Config: $CONFIG_DIR"
@@ -36,7 +36,7 @@ fi
 echo ""
 
 # Confirm removal
-read -p "❓ Are you sure you want to uninstall MonitorPlus? (y/N): " -n 1 -r
+read -p "❓ Are you sure you want to uninstall VigilPlus? (y/N): " -n 1 -r
 echo ""
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "❌ Uninstall cancelled"
@@ -47,14 +47,14 @@ echo "🛑 Starting uninstall process..."
 
 # Stop and disable service if it exists
 if [ -f "$SERVICE_FILE" ]; then
-    echo "🔄 Stopping MonitorPlus service..."
+    echo "🔄 Stopping VigilPlus service..."
     if [ "$INSTALL_GLOBAL" = true ]; then
-        systemctl stop monitorplus.service 2>/dev/null || true
-        systemctl disable monitorplus.service 2>/dev/null || true
+        systemctl stop vigilplus.service 2>/dev/null || true
+        systemctl disable vigilplus.service 2>/dev/null || true
         systemctl daemon-reload
     else
-        systemctl --user stop monitorplus.service 2>/dev/null || true
-        systemctl --user disable monitorplus.service 2>/dev/null || true
+        systemctl --user stop vigilplus.service 2>/dev/null || true
+        systemctl --user disable vigilplus.service 2>/dev/null || true
         systemctl --user daemon-reload
     fi
     
@@ -63,9 +63,9 @@ if [ -f "$SERVICE_FILE" ]; then
 fi
 
 # Remove symlink
-if [ -L "$BIN_DIR/monitorplus" ]; then
+if [ -L "$BIN_DIR/vigilplus" ]; then
     echo "🔗 Removing command symlink..."
-    rm -f "$BIN_DIR/monitorplus"
+    rm -f "$BIN_DIR/vigilplus"
 fi
 
 # Remove installation directory
@@ -100,16 +100,16 @@ fi
 
 # Clean up temp files
 echo "🧹 Cleaning up temporary files..."
-rm -rf /tmp/monitorplus* 2>/dev/null || true
+rm -rf /tmp/vigilplus* 2>/dev/null || true
 
 echo ""
-echo "✅ MonitorPlus has been uninstalled successfully!"
+echo "✅ VigilPlus has been uninstalled successfully!"
 echo ""
 
 # Check for leftover processes
-PROCESSES=$(pgrep -f "monitorplus\|monitor.*plus" 2>/dev/null || true)
+PROCESSES=$(pgrep -f "vigilplus\|vigil.*plus" 2>/dev/null || true)
 if [ ! -z "$PROCESSES" ]; then
-    echo "⚠️  Warning: Found running MonitorPlus processes:"
+    echo "⚠️  Warning: Found running VigilPlus processes:"
     ps -p $PROCESSES -o pid,cmd 2>/dev/null || true
     echo "💡 You may want to kill them manually: sudo kill $PROCESSES"
 fi

@@ -1,39 +1,74 @@
-# Source maps (not needed in production)
-*.map
-
-# Source TypeScript files (already compiled to dist/)
+# Source files (already compiled to dist/)
 src/
+*.ts
+!dist/**/*.d.ts
 
-# Development files
+# Development and build configuration
 tsconfig.json
-*.test.js
-*.test.ts
-
-# Build tools and configs
 jest.config.js
 .eslintrc*
 .prettierrc*
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# Development dependencies
+node_modules/
+package-lock.json
 
 # IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
+.editorconfig
 
 # OS files
 .DS_Store
 Thumbs.db
+*.tmp
 
-# Logs
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Documentation (except README)
+docs/
+*.md
+!README.md
+
+# Logs and temporary files
 logs/
 *.log
-
-# Temporary files
 tmp/
 temp/
 
-# Package files
-*.tgz
+# Environment files
+.env*
 
-# Deployment files (provided separately)
-deploy/ 
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# Cache directories
+.cache/
+.npm/
+.yarn/
+
+# Development files  
+scripts/
+examples/
+test/ 

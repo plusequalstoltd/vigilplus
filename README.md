@@ -1,250 +1,102 @@
-# VigilPlus 📊
+# VigilPlus 🛡️
 
-A powerful, real-time server monitoring tool built with Node.js and TypeScript. Monitor your system's CPU, memory, disk I/O, and network performance with beautiful terminal displays and customizable alerts.
+**Advanced server monitoring tool with real-time metrics, alerts, and web API integration**
 
-## Features
+A lightweight, powerful monitoring solution that keeps your servers vigilant. Track CPU, memory, disk usage, and system health with both beautiful terminal displays and RESTful APIs for web/mobile integration.
 
-### Current Capabilities ✅
+## ✨ Features
 
-- **CPU Monitoring**: Real-time CPU usage percentage, core count, speed, and temperature
-- **Memory Monitoring**: RAM usage, available memory, swap usage with visual progress bars
-- **Disk I/O**: Read/write speeds, disk space usage, and storage metrics
-- **Network Traffic**: Download/upload speeds, bytes transferred
-- **Real-time Display**: Beautiful terminal interface with colored output and progress bars
-- **Alerts System**: Configurable thresholds for CPU, memory, and disk usage
-- **Multiple Commands**: Monitor, status check, system info, and alert configuration
+- **Real-time Monitoring**: Live system metrics with configurable intervals
+- **Multiple Interfaces**: Terminal display, web API, or both simultaneously  
+- **Smart Alerts**: Configurable thresholds with visual and audio notifications
+- **Historical Data**: Track performance trends over time
+- **Cross-Platform**: Works on Linux, macOS, and Windows
+- **Lightweight**: Minimal resource footprint (~10MB RAM)
+- **Easy Integration**: RESTful API for web and mobile applications
 
-### Future Features 🚀
+## 🚀 Quick Start
 
-- **Response Time Monitoring**: HTTP/HTTPS endpoint response time tracking
-- **Error Rate Tracking**: Monitor application error rates and patterns
-- **Application-Specific Metrics**: Database query times, API response times
-- **Historical Data Export**: Export monitoring data to JSON/CSV
-- **Web Dashboard**: Browser-based monitoring interface
-- **Multiple Server Monitoring**: Monitor multiple servers from one dashboard
+### Installation
 
-## Installation
-
-### From NPM (Coming Soon)
 ```bash
+# Global installation (recommended)
 npm install -g vigilplus
+
+# The installer will guide you through setup options
 ```
 
-### Development Setup
-```bash
-# Clone the repository
-git clone <repository-url>
-cd vigilplus
+## 📊 Usage
 
-# Install dependencies
-npm install
-
-# Build the project
-npm run build
-
-# Link for global use (optional)
-npm link
-```
-
-## Usage
-
-### Real-time Monitoring
-Start continuous monitoring with default settings:
+### Monitor in Terminal
+Perfect for direct server monitoring and SSH sessions.
 ```bash
 vigilplus monitor
 ```
 
-With custom options:
+### Start API Server  
+Ideal for web dashboards and mobile app integration.
 ```bash
-# Custom update interval (2 seconds)
-monitorplus monitor --interval 2000
-
-# Enable logging with custom path
-monitorplus monitor --log --log-path ./system-monitor.log
-
-# Custom alert thresholds
-monitorplus monitor --cpu-alert 70 --memory-alert 80 --disk-alert 85
+vigilplus server --port 8080
 ```
 
-### Quick System Status
-Get a one-time snapshot of system metrics:
+### Both Together
+Complete monitoring solution with API + terminal display.
 ```bash
-monitorplus status
+vigilplus server --port 8080 --with-monitor
 ```
 
-### System Information
-View detailed system information:
+### Quick Status Check
+Get instant system snapshot.
 ```bash
-monitorplus info
+vigilplus status
 ```
 
-### Alert Configuration
-Configure monitoring alerts:
+## 🌐 API Endpoints
+
+When running in server mode, VigilPlus provides a comprehensive REST API:
+
+- `GET /health` - Server health check
+- `GET /api/metrics` - Current system metrics  
+- `GET /api/stream` - Real-time data stream (SSE)
+- `GET /api/history` - Historical performance data
+
+## ⚙️ Configuration Options
+
 ```bash
-# Set custom thresholds
-monitorplus alerts --cpu 75 --memory 80 --disk 90
-
-# Disable specific metric alerts
-monitorplus alerts --disable cpu
+--port 8080        # Server port (default: 3000)
+--host 0.0.0.0     # Bind address (default: all interfaces)
+--interval 5       # Update interval in seconds (default: 2)
+--cpu 75           # CPU alert threshold % (default: 80)
+--memory 80        # Memory alert threshold % (default: 85)
+--disk 90          # Disk alert threshold % (default: 90)
+--log              # Enable file logging
+--with-monitor     # Enable terminal display with API server
+--help             # Show all available options
 ```
 
-## Command Line Options
+## 📋 Example API Response
 
-### `monitorplus monitor`
-- `-i, --interval <ms>`: Update interval in milliseconds (default: 2000)
-- `-l, --log`: Enable logging to file
-- `--log-path <path>`: Custom log file path (default: ./monitor.log)
-- `--cpu-alert <percentage>`: CPU usage alert threshold (default: 80)
-- `--memory-alert <percentage>`: Memory usage alert threshold (default: 85)
-- `--disk-alert <percentage>`: Disk usage alert threshold (default: 90)
-
-### `monitorplus status`
-Shows current system status once and exits.
-
-### `monitorplus info`
-Displays detailed system information including hardware specs.
-
-### `monitorplus alerts`
-- `--cpu <threshold>`: Set CPU alert threshold
-- `--memory <threshold>`: Set memory alert threshold
-- `--disk <threshold>`: Set disk alert threshold
-- `--disable <metric>`: Disable alerts for a specific metric
-
-## Programmatic Usage
-
-You can also use MonitorPlus as a library in your Node.js applications:
-
-```typescript
-import { SystemMonitor, ConsoleDisplay, defaultConfig } from 'monitorplus';
-
-// Create monitor with custom config
-const monitor = new SystemMonitor({
-  ...defaultConfig,
-  interval: 5000, // 5 seconds
-  alerts: [
-    {
-      metric: 'cpu',
-      threshold: 90,
-      operator: '>',
-      enabled: true
-    }
-  ]
-});
-
-const display = new ConsoleDisplay();
-
-// Set up event handlers
-monitor.on('metrics', (metrics) => {
-  console.log('CPU Usage:', metrics.cpu.usage + '%');
-  console.log('Memory Usage:', metrics.memory.usagePercentage + '%');
-});
-
-monitor.on('alert', (alert) => {
-  console.log(`ALERT: ${alert.metric} is at ${alert.value}%`);
-});
-
-// Start monitoring
-monitor.start();
-
-// Stop monitoring after 1 minute
-setTimeout(() => {
-  monitor.stop();
-}, 60000);
+```json
+{
+  "success": true,
+  "timestamp": "2025-01-09T10:30:00.000Z",
+  "data": {
+    "cpu": { "usage": 45.2, "cores": 4, "temperature": 65 },
+    "memory": { "usage": 68.1, "total": 16384, "used": 11157 },
+    "disk": [{ "usage": 72.3, "total": 500, "used": 361 }],
+    "load": { "1min": 1.2, "5min": 1.0, "15min": 0.8 }
+  }
+}
 ```
 
-## System Requirements
+## 🎯 Perfect For
 
-- Node.js 14.0.0 or higher
-- TypeScript 4.0+ (for development)
-- Works on Linux, macOS, and Windows
+- **System Administrators**: Monitor servers directly via terminal
+- **Web Developers**: Integrate real-time metrics into dashboards  
+- **Mobile App Developers**: Build monitoring apps with REST API
+- **DevOps Teams**: Track server performance and set up alerts
+- **Small Businesses**: Simple, effective server monitoring solution
 
-## Metrics Explained
+## 📄 License
 
-### CPU Metrics
-- **Usage**: Percentage of CPU cores currently being used
-- **Cores**: Number of physical CPU cores
-- **Speed**: Current CPU frequency in GHz
-- **Temperature**: CPU temperature (when available)
-
-### Memory Metrics
-- **Usage Percentage**: Percentage of total RAM being used
-- **Used/Free/Total**: Memory amounts in bytes
-- **Swap**: Virtual memory usage
-
-### Disk Metrics
-- **Usage Percentage**: Percentage of disk space used
-- **Read/Write Speed**: Current disk I/O speeds in MB/s
-- **Space**: Used, free, and total disk space
-
-### Network Metrics
-- **Download/Upload Speed**: Current network transfer rates in Mbps
-- **Bytes Received/Sent**: Total network traffic since monitoring started
-
-## Display Features
-
-- **Color-coded metrics**: Green (good), yellow (warning), red (critical)
-- **Progress bars**: Visual representation of usage percentages
-- **Real-time updates**: Automatically refreshes based on interval
-- **Clean interface**: Organized sections with icons and formatting
-
-## Keyboard Shortcuts
-
-- `Ctrl+C`: Stop monitoring and exit
-- Terminal supports standard scrolling and copy/paste
-
-## Troubleshooting
-
-### Permission Issues
-On some systems, you might need elevated permissions to access certain system metrics:
-```bash
-sudo monitorplus monitor
-```
-
-### Missing Dependencies
-If you encounter missing dependencies:
-```bash
-npm install
-npm run build
-```
-
-### Platform-specific Issues
-- **macOS**: Some temperature readings might not be available
-- **Windows**: Disk I/O calculations may vary from other tools
-- **Linux**: Requires appropriate permissions for hardware access
-
-## Contributing
-
-We welcome contributions! Areas for improvement:
-
-1. **Response Time Monitoring**: Add HTTP endpoint monitoring
-2. **Error Rate Tracking**: Implement application error monitoring
-3. **Web Interface**: Create a browser-based dashboard
-4. **Data Export**: Add CSV/JSON export functionality
-5. **Configuration Persistence**: Save settings between sessions
-
-## License
-
-MIT License - see LICENSE file for details.
-
-## Development
-
-### Scripts
-- `npm run build`: Compile TypeScript to JavaScript
-- `npm run dev`: Run in development mode with ts-node
-- `npm run watch`: Watch mode for development
-- `npm test`: Run tests (when implemented)
-
-### Project Structure
-```
-src/
-├── types/          # TypeScript type definitions
-├── services/       # Core monitoring services
-├── display/        # Output formatting and display
-├── utils/          # Utility functions
-├── cli.ts          # Command-line interface
-└── index.ts        # Main library exports
-```
-
----
-
-**MonitorPlus** - Making server monitoring simple and beautiful! 🚀 
+MIT - Build amazing monitoring solutions with VigilPlus! 

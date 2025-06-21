@@ -2,8 +2,8 @@
 
 set -e
 
-echo "⚙️  MonitorPlus Service Setup"
-echo "============================="
+echo "⚙️  VigilPlus Service Setup"
+echo "=========================="
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
@@ -11,14 +11,14 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-INSTALL_DIR="/opt/monitorplus"
-SERVICE_FILE="/etc/systemd/system/monitorplus.service"
-CONFIG_DIR="/etc/monitorplus"
-LOG_DIR="/var/log/monitorplus"
+INSTALL_DIR="/opt/vigilplus"
+SERVICE_FILE="/etc/systemd/system/vigilplus.service"
+CONFIG_DIR="/etc/vigilplus"
+LOG_DIR="/var/log/vigilplus"
 
-# Check if MonitorPlus is installed
+# Check if VigilPlus is installed
 if [ ! -f "$INSTALL_DIR/dist/cli.js" ]; then
-    echo "❌ MonitorPlus not found at $INSTALL_DIR"
+    echo "❌ VigilPlus not found at $INSTALL_DIR"
     echo "💡 Please run install.sh first"
     exit 1
 fi
@@ -34,7 +34,7 @@ cat > "$CONFIG_DIR/config.json" << EOF
 {
   "interval": 5000,
   "logToFile": true,
-  "logPath": "/var/log/monitorplus/monitor.log",
+  "logPath": "/var/log/vigilplus/monitor.log",
   "alerts": [
     {
       "metric": "cpu",
@@ -62,7 +62,7 @@ EOF
 echo "🔧 Creating systemd service..."
 cat > "$SERVICE_FILE" << EOF
 [Unit]
-Description=MonitorPlus - Advanced Server Monitoring
+Description=VigilPlus - Advanced Server Monitoring
 After=network.target
 Wants=network.target
 
@@ -71,17 +71,17 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=$INSTALL_DIR
-ExecStart=/usr/bin/node $INSTALL_DIR/dist/cli.js monitor --interval 5000 --log --log-path /var/log/monitorplus/monitor.log
+ExecStart=/usr/bin/node $INSTALL_DIR/dist/cli.js monitor --interval 5000 --log --log-path /var/log/vigilplus/monitor.log
 Restart=always
 RestartSec=10
-StandardOutput=append:/var/log/monitorplus/service.log
-StandardError=append:/var/log/monitorplus/service.log
+StandardOutput=append:/var/log/vigilplus/service.log
+StandardError=append:/var/log/vigilplus/service.log
 
 # Security settings
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/log/monitorplus
+ReadWritePaths=/var/log/vigilplus
 
 # Environment
 Environment=NODE_ENV=production
@@ -100,19 +100,19 @@ chown -R root:root "$LOG_DIR"
 # Reload systemd and enable service
 echo "🔄 Enabling service..."
 systemctl daemon-reload
-systemctl enable monitorplus.service
+systemctl enable vigilplus.service
 
-echo "✅ MonitorPlus service configured successfully!"
+echo "✅ VigilPlus service configured successfully!"
 echo ""
 echo "🎮 Service Management:"
-echo "   systemctl start monitorplus     # Start the service"
-echo "   systemctl stop monitorplus      # Stop the service"
-echo "   systemctl status monitorplus    # Check status"
-echo "   systemctl restart monitorplus   # Restart the service"
+echo "   systemctl start vigilplus     # Start the service"
+echo "   systemctl stop vigilplus      # Stop the service"
+echo "   systemctl status vigilplus    # Check status"
+echo "   systemctl restart vigilplus   # Restart the service"
 echo ""
 echo "📊 Monitoring:"
-echo "   tail -f /var/log/monitorplus/monitor.log    # View monitoring logs"
-echo "   tail -f /var/log/monitorplus/service.log    # View service logs"
+echo "   tail -f /var/log/vigilplus/monitor.log    # View monitoring logs"
+echo "   tail -f /var/log/vigilplus/service.log    # View service logs"
 echo ""
 echo "⚡ To start monitoring now:"
-echo "   systemctl start monitorplus" 
+echo "   systemctl start vigilplus" 

@@ -64,23 +64,56 @@ export function showHelp(programName: string): void {
 Usage: ${programName} [command] [options]
 
 Commands:
-  monitor     Start real-time system monitoring
-  status      Display current system status
-  info        Show detailed system information  
-  alerts      Configure alert thresholds
+  monitor     Start real-time system monitoring with terminal display
+  server      Start HTTP API server for remote monitoring and Flutter app integration
+  status      Display current system status snapshot
+  info        Show detailed system information and hardware specs
+  alerts      Configure monitoring alert thresholds
 
-Options:
-  --interval  Update interval in seconds (default: 2)
-  --cpu       CPU alert threshold % (default: 80)
-  --memory    Memory alert threshold % (default: 90)
-  --disk      Disk alert threshold % (default: 95)
-  --disable   Disable specific alert types
+Global Options:
   -h, --help  Show this help message
 
+Monitor Options:
+  --interval  Update interval in seconds (default: 2)
+  --cpu       CPU alert threshold % (default: 80)
+  --memory    Memory alert threshold % (default: 85)
+  --disk      Disk alert threshold % (default: 90)
+  --log       Enable logging to file
+  --log-path  Custom log file path (default: ./monitor.log)
+
+Server Options:
+  --port            Server port number (default: 3000)
+  --host            Server bind address (default: 0.0.0.0 - all interfaces)
+  --interval        Metrics update interval in seconds (default: 2)
+  --cpu             CPU alert threshold % (default: 80)
+  --memory          Memory alert threshold % (default: 85)
+  --disk            Disk alert threshold % (default: 90)
+  --with-monitor    Enable terminal monitor display alongside API server
+  --monitor-interval Monitor update interval in seconds (default: 2)
+  --monitor-log     Log file path for monitor mode (default: ./monitor.log)
+
+Alert Options:
+  --cpu       CPU usage alert threshold % (default: 80)
+  --memory    Memory usage alert threshold % (default: 85)
+  --disk      Disk usage alert threshold % (default: 90)
+  --disable   Disable specific alert types (cpu|memory|disk)
+
 Examples:
-  ${programName} monitor
-  ${programName} monitor --interval 5
   ${programName} status
-  ${programName} alerts --cpu 75 --memory 85
+  ${programName} info
+  ${programName} monitor --interval 5 --cpu 75
+  ${programName} server --port 8080 --host 127.0.0.1
+  ${programName} server --port 3001 --interval 1
+  ${programName} server --port 8080 --with-monitor --monitor-log /var/log/vigilplus/monitor.log
+  ${programName} alerts --cpu 70 --memory 80 --disk 90
+
+Environment Variables:
+  NODE_ENV           Set to 'production' for production mode
+  ALLOWED_ORIGINS    Comma-separated list of allowed CORS origins
+  
+Security Notes:
+  - Use --host 127.0.0.1 to bind only to localhost
+  - Set ALLOWED_ORIGINS to restrict API access
+  - Monitor logs for suspicious activity
 `);
 } 
