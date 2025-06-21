@@ -31,6 +31,9 @@ async function main() {
     case 'alerts':
       handleAlertsCommand(args.options);
       break;
+    case 'setup':
+      await handleSetupCommand();
+      break;
     default:
       console.error(colors.red(`Unknown command: ${args.command}`));
       showHelp('vigilplus');
@@ -147,37 +150,52 @@ async function handleStatusCommand() {
 }
 
 async function handleServerCommand(options: Record<string, any>) {
-  const port = parseInt(options.port || '3000');
-  const host = options.host || '0.0.0.0';
+  // Load config file if it exists
+  let config: any = {};
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const configFile = path.join(process.env.HOME || '/tmp', '.vigilplus', 'config.json');
+    if (fs.existsSync(configFile)) {
+      const configData = fs.readFileSync(configFile, 'utf8');
+      config = JSON.parse(configData);
+      console.log(colors.green('✅ Using saved configuration from ~/.vigilplus/config.json'));
+    }
+  } catch (error) {
+    // Ignore config file errors, use defaults
+  }
+
+  const port = parseInt(options.port || config.server?.port || '8080');
+  const host = options.host || config.server?.host || '0.0.0.0';
   const withMonitor = options['with-monitor'] || false;
   
-  const config: MonitoringConfig = {
-    interval: (options.interval || options['monitor-interval'] || 2) * 1000, // Convert to milliseconds
+  const monitoringConfig: MonitoringConfig = {
+    interval: (options.interval || options['monitor-interval'] || config.server?.interval || 2) * 1000, // Convert to milliseconds
     logToFile: withMonitor && (options['monitor-log'] || false),
     logPath: options['monitor-log'] || './monitor.log',
     alerts: [
       {
         metric: 'cpu',
-        threshold: parseFloat(options.cpu || '80'),
+        threshold: parseFloat(options.cpu || config.alerts?.cpu || '80'),
         operator: '>',
         enabled: true
       },
       {
         metric: 'memory',
-        threshold: parseFloat(options.memory || '85'),
+        threshold: parseFloat(options.memory || config.alerts?.memory || '85'),
         operator: '>',
         enabled: true
       },
       {
         metric: 'disk',
-        threshold: parseFloat(options.disk || '90'),
+        threshold: parseFloat(options.disk || config.alerts?.disk || '90'),
         operator: '>',
         enabled: true
       }
     ]
   };
 
-  const monitor = new SystemMonitor(config);
+  const monitor = new SystemMonitor(monitoringConfig);
   const apiServer = new ApiServer(monitor, port, host);
   const display = withMonitor ? new ConsoleDisplay() : null;
 
@@ -317,6 +335,99 @@ async function handleInfoCommand() {
   } catch (error) {
     console.error(colors.red('Failed to get system information:'), error);
     process.exit(1);
+  }
+}
+
+async function handleSetupCommand() {
+  const fs = await import('fs');
+  const path = await import('path');
+  const readline = await import('readline');
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  const question = (prompt: string): Promise<string> => {
+    return new Promise((resolve) => {
+      rl.question(prompt, resolve);
+    });
+  };
+
+  try {
+    console.log(colors.cyan('🛠️  VigilPlus Setup Configuration\n'));
+    
+    // Ask for port
+    const portInput = await question(colors.yellow('Enter preferred server port (default: 8080): '));
+    const port = portInput.trim() || '8080';
+    
+    // Validate port
+    const portNum = parseInt(port);
+    if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+      console.log(colors.red('❌ Invalid port number. Using default 8080.'));
+    }
+    
+    // Ask for host
+    const hostInput = await question(colors.yellow('Enter server host (default: 0.0.0.0 for all interfaces): '));
+    const host = hostInput.trim() || '0.0.0.0';
+    
+    // Ask for monitoring interval
+    const intervalInput = await question(colors.yellow('Enter monitoring interval in seconds (default: 2): '));
+    const interval = intervalInput.trim() || '2';
+    
+    // Ask for alert thresholds
+    const cpuInput = await question(colors.yellow('Enter CPU alert threshold % (default: 80): '));
+    const cpu = cpuInput.trim() || '80';
+    
+    const memoryInput = await question(colors.yellow('Enter Memory alert threshold % (default: 85): '));
+    const memory = memoryInput.trim() || '85';
+    
+    const diskInput = await question(colors.yellow('Enter Disk alert threshold % (default: 90): '));
+    const disk = diskInput.trim() || '90';
+    
+    // Create config object
+    const config = {
+      server: {
+        port: parseInt(port) || 8080,
+        host: host,
+        interval: parseInt(interval) || 2
+      },
+      alerts: {
+        cpu: parseInt(cpu) || 80,
+        memory: parseInt(memory) || 85,
+        disk: parseInt(disk) || 90
+      },
+      logging: {
+        enabled: true,
+        path: '~/vigilplus.log'
+      }
+    };
+    
+    // Create config directory
+    const configDir = path.join(process.env.HOME || '/tmp', '.vigilplus');
+    const configFile = path.join(configDir, 'config.json');
+    
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    
+    // Write config file
+    fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
+    
+    console.log(colors.green('\n✅ Configuration saved successfully!'));
+    console.log(colors.cyan(`📁 Config file: ${configFile}`));
+    console.log(colors.yellow('\n🚀 Quick start commands:'));
+    console.log(colors.white(`   vigilplus server    # Uses your configured settings`));
+    console.log(colors.white(`   vigilplus monitor   # Terminal monitoring`));
+    console.log(colors.white(`   vigilplus status    # Quick system check`));
+    
+    console.log(colors.gray('\n💡 You can still override settings with command line options:'));
+    console.log(colors.gray(`   vigilplus server --port ${config.server.port} --host ${config.server.host}`));
+    
+  } catch (error) {
+    console.error(colors.red('❌ Setup failed:'), error);
+  } finally {
+    rl.close();
   }
 }
 

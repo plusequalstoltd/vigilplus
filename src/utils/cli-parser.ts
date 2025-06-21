@@ -64,6 +64,7 @@ export function showHelp(programName: string): void {
 Usage: ${programName} [command] [options]
 
 Commands:
+  setup       Interactive setup to configure default settings
   monitor     Start real-time system monitoring with terminal display
   server      Start HTTP API server for remote monitoring and Flutter app integration
   status      Display current system status snapshot
@@ -99,6 +100,7 @@ Alert Options:
   --disable   Disable specific alert types (cpu|memory|disk)
 
 Examples:
+  ${programName} setup
   ${programName} status
   ${programName} info
   ${programName} monitor --interval 5 --cpu 75
