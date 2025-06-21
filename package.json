@@ -1,6 +1,6 @@
 {
   "name": "vigilplus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Advanced Linux server monitoring tool with real-time metrics, alerts, and Flutter app integration",
   "main": "dist/index.js",
   "bin": {
